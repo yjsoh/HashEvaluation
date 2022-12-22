@@ -14,16 +14,26 @@
 #include <regex>  // std::regex_replace
 #include <string>
 #include <vector>
+#include <fstream>
+#include <iostream>
 
 #include "hash_api.h"
 #include "utils.hpp"
 using namespace std;
 namespace PiBench {
+ofstream fileInput;
+ofstream fileInputLatency;
+
 void print_environment() {
   std::time_t now = std::time(nullptr);
   uint64_t num_cpus = 0;
   std::string cpu_type;
   std::string cache_size;
+  
+//  ofstream fileInput;
+  fileInput.open("outputFile.txt", fstream::app); 
+  fileInputLatency.open("outputFileLatency.txt", fstream::app);
+  fileInputLatency << "\n";
 
   std::ifstream cpuinfo("/proc/cpuinfo", std::ifstream::in);
 
@@ -249,6 +259,9 @@ void benchmark_t::run() noexcept {
   }
 #pragma omp single nowait
   { elapsed = swt.elapsed<std::chrono::microseconds>(); }
+//  ofstream fileInput;
+//  fileInput.open("outputFile.txt");
+
   if (opt_.pm) {
     std::unique_ptr<SystemCounterState> after_sstate;
     after_sstate = std::make_unique<SystemCounterState>();
@@ -278,14 +291,20 @@ void benchmark_t::run() noexcept {
               << "\n"
               << "\tLL3 misses: "
               << getL3CacheMisses(*before_sstate, *after_sstate) << "\n"
-              << "\tRun time(ms): " << elapsed / 1000 << "\n"
-              << "\tThroughput(Mops/s): " << (float)opt_.num_ops / elapsed
+              << "\tRun time(ms): " <<  elapsed / 1000 << "\n"
+              << "\tThroughput(Mops/s): " << std::setprecision(5) << (opt_.num_ops / elapsed) 
               << std::endl;
+    	     
+	     fileInput << std::setprecision(5) << (float) opt_.num_ops / elapsed << "\n";
+
   }
   if (opt_.throughput) {
     std::cout << "\tRun time(ms): " << elapsed / 1000 << std::endl;
-    std::cout << "\tThroughput(Mops/s): " << (float)opt_.num_ops / elapsed
+    std::cout << "\tThroughput(Mops/s): " << std::setprecision(5) << (opt_.num_ops / elapsed)
               << std::endl;
+ 
+    fileInput << "," << std::setprecision(5) << (float) opt_.num_ops / elapsed << "\n";
+    fileInput.close();
   }
   if (opt_.latency) {
     std::cout << "\tLatency(ns): \t" << std::endl;
@@ -302,10 +321,19 @@ void benchmark_t::run() noexcept {
          << "4 " << v[0.999 * sz] << "\n"
          << "5 " << v[0.9999 * sz] << "\n"
          << "6 " << v[0.99999 * sz] << std::endl;
+    fileInputLatency << opt_.hash_size << "," << 0 << "," << std::setprecision(5) << (float) v[0] << "\n";
+    fileInputLatency << opt_.hash_size << "," << 0.5 << "," << std::setprecision(5) << (float) v[0.5] << "\n";
+    fileInputLatency << opt_.hash_size << "," << 0.9 << "," << std::setprecision(5) << (float) v[0.9 * sz] << "\n";
+    fileInputLatency << opt_.hash_size << "," << 0.99 << "," << std::setprecision(5) << (float) v[0.99 * sz] << "\n";
+    fileInputLatency << opt_.hash_size << "," << 0.999 << "," << std::setprecision(5) << (float) v[0.999 * sz] << "\n";
+    fileInputLatency << opt_.hash_size << "," << 0.9999 << "," << std::setprecision(5) << (float) v[0.9999 * sz] << "\n";
+    fileInputLatency << opt_.hash_size << "," << 0.99999 << "," << std::setprecision(5) << (float) v[0.99999 * sz] << "\n";
+    fileInputLatency.close();
   }
   if (opt_.resize_ratio) {
     cout << total_resize_time << " " << elapsed << std::endl;
   }
+
 }
 }  // namespace PiBench
 

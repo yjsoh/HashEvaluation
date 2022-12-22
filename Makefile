@@ -11,7 +11,7 @@ hash:pibench
 		make -C $$dir;\
 	done
 bin:hash
-	@mkdir bin;find ./ -name "*.so" ! -name "lib*" -type f -exec cp {} ./bin/ \;;\
+	@mkdir -p bin;find ./ -name "*.so" ! -name "lib*" -type f -exec cp {} ./bin/ \;;\
 	cp pibench/src/PiBench ./bin;
 	
 
