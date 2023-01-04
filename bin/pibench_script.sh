@@ -16,14 +16,18 @@ echo "--------------------"
 echo "Size,Throughput" >> "outputFile.txt"
 #for i in ${!hashtables[@]};
 #do
-	for (( size = 2048; size<=4194304; size*=2))
+	for (( size=2048; size<=4194304; size*=2))
 	do
 		echo "Size of hashtable = $size"
 		echo  ${hashtables[$i]}
 		echo "$size" >> "outputFile.txt"
-		sudo ./PiBench ./Level.so -S $size -M THROUGHPUT
+        sudo -E ./PiBench ./CCEH.so -S $size -M THROUGHPUT  
+		# env LD_PRELOAD=/home/yjsoh/HashEvaluation/hash/Dash/pmdk/src/libpmemobj sudo -E ./PiBench ./CCEH.so -S $size -M THROUGHPUT  
+		# export LD_PRELOAD=/home/yjsoh/HashEvaluation/hash/Dash/pmdk/src/libpmemobj; sudo -E ./PiBench ./PCLHT.so -S $size -M THROUGHPUT
+		# sudo -E bash ./PiBench -c ./PCLHT.so -S $size -M THROUGHPUT 'echo $LD_PRELOAD=/home/yjsoh/HashEvaluation/hash/Dash/pmdk/src/libpmemobj'
+		# env LD_PRELOAD=/home/yjsoh/HashEvaluation/hash/Dash/pmdk/src/libpmemobj 
 	done
-#done
+# done
 
 ## latency values 
 #echo "Size,Percentile of num operations, Latency" >> "outputFileLatency.txt"
