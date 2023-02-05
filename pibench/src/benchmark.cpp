@@ -23,6 +23,7 @@ using namespace std;
 namespace PiBench {
 ofstream fileInput;
 ofstream fileInputLatency;
+ofstream fileInputResize;
 
 void print_environment() {
   std::time_t now = std::time(nullptr);
@@ -33,7 +34,8 @@ void print_environment() {
 //  ofstream fileInput;
   fileInput.open("outputFile.txt", fstream::app); 
   fileInputLatency.open("outputFileLatency.txt", fstream::app);
-  fileInputLatency << "\n";
+  fileInputResize.open("outputFileResize.txt", fstream::app);
+  // fileInputLatency << "\n";
 
   std::ifstream cpuinfo("/proc/cpuinfo", std::ifstream::in);
 
@@ -238,6 +240,7 @@ void benchmark_t::run() noexcept {
             cout << "Inserted: " << i / 1000000
                  << "M load factor: " << u.load_factor
                  << "  utilization: " << u.utilization << "\n";
+                //  print out the latency for a given load factor. 
           }
 
           break;
@@ -295,7 +298,6 @@ void benchmark_t::run() noexcept {
               << "\tThroughput(Mops/s): " << std::setprecision(5) << (opt_.num_ops / elapsed) 
               << std::endl;
     	     
-	     fileInput << std::setprecision(5) << (float) opt_.num_ops / elapsed << "\n";
 
   }
   if (opt_.throughput) {
@@ -303,7 +305,7 @@ void benchmark_t::run() noexcept {
     std::cout << "\tThroughput(Mops/s): " << std::setprecision(5) << (opt_.num_ops / elapsed)
               << std::endl;
  
-    fileInput << "," << std::setprecision(5) << (float) opt_.num_ops / elapsed << "\n";
+    fileInput << std::setprecision(5) << (float) opt_.num_ops / elapsed << "\n";
     fileInput.close();
   }
   if (opt_.latency) {
@@ -332,6 +334,7 @@ void benchmark_t::run() noexcept {
   }
   if (opt_.resize_ratio) {
     cout << total_resize_time << " " << elapsed << std::endl;
+    fileInputResize << std::setprecision(5) << (float) total_resize_time << "\n";
   }
 
 }
